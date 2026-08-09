@@ -1,165 +1,504 @@
-const WIN_COMBOS = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-  [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-  [0, 4, 8], [2, 4, 6]             // diagonals
+/* =====================================
+   TIC TAC TOE
+   PRODIGY INFOTECH - TASK 03
+===================================== */
+
+
+/* =====================================
+   ELEMENTS
+===================================== */
+
+const cells = document.querySelectorAll(".cell");
+
+const turnMessage = document.getElementById("turnMessage");
+
+const scoreXElement = document.getElementById("scoreX");
+const scoreOElement = document.getElementById("scoreO");
+const scoreDrawsElement = document.getElementById("scoreDraws");
+
+const resultMessage = document.getElementById("resultMessage");
+
+const newGameBtn = document.getElementById("newGameBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+const turnDot = document.querySelector(".turn-dot");
+
+
+/* =====================================
+   GAME VARIABLES
+===================================== */
+
+let board = [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
 ];
 
-const CELL_CENTER = [
-  [53, 53],   [150, 53],  [247, 53],
-  [53, 150],  [150, 150], [247, 150],
-  [53, 247],  [150, 247], [247, 247]
-];
+let currentPlayer = "X";
 
-const state = {
-  board: Array(9).fill(null),
-  currentPlayer: "X",
-  gameOver: false,
-  round: 1,
-  scores: { X: 0, O: 0, draw: 0 }
+let gameActive = true;
+
+
+/* =====================================
+   SCORE
+===================================== */
+
+let scores = {
+    X: 0,
+    O: 0,
+    draws: 0
 };
 
-const boardEl = document.getElementById("board");
-const cells = Array.from(document.querySelectorAll(".cell"));
-const turnIndicator = document.getElementById("turnIndicator");
-const roundNumberEl = document.getElementById("roundNumber");
-const scoreXValue = document.getElementById("scoreXValue");
-const scoreOValue = document.getElementById("scoreOValue");
-const scoreDrawValue = document.getElementById("scoreDrawValue");
-const newRoundBtn = document.getElementById("newRound");
-const resetScoresBtn = document.getElementById("resetScores");
-const strikeLine = document.getElementById("strikeLine");
-const strikeLinePath = document.getElementById("strikeLinePath");
-const toastEl = document.getElementById("toast");
 
-function init() {
-  cells.forEach((cell) => {
-    cell.addEventListener("click", () => handleCellClick(cell));
-  });
-  newRoundBtn.addEventListener("click", startNewRound);
-  resetScoresBtn.addEventListener("click", resetScores);
-  updateTurnIndicator();
-}
+/* =====================================
+   WINNING COMBINATIONS
+===================================== */
 
-function handleCellClick(cell) {
-  const index = Number(cell.dataset.index);
-  if (state.gameOver || state.board[index]) return;
+const winningCombinations = [
 
-  state.board[index] = state.currentPlayer;
-  cell.textContent = state.currentPlayer;
-  cell.classList.add(`marked-${state.currentPlayer.toLowerCase()}`, "pop");
-  cell.disabled = true;
+    [0, 1, 2],
 
-  const winInfo = checkWin();
-  if (winInfo) {
-    endRound(winInfo);
-    return;
-  }
+    [3, 4, 5],
 
-  if (state.board.every(Boolean)) {
-    endRound(null); // draw
-    return;
-  }
+    [6, 7, 8],
 
-  state.currentPlayer = state.currentPlayer === "X" ? "O" : "X";
-  updateTurnIndicator();
-}
+    [0, 3, 6],
 
-function checkWin() {
-  for (const combo of WIN_COMBOS) {
-    const [a, b, c] = combo;
-    if (state.board[a] && state.board[a] === state.board[b] && state.board[a] === state.board[c]) {
-      return { combo, winner: state.board[a] };
+    [1, 4, 7],
+
+    [2, 5, 8],
+
+    [0, 4, 8],
+
+    [2, 4, 6]
+
+];
+
+
+/* =====================================
+   LOAD SAVED SCORE
+===================================== */
+
+function loadScore() {
+
+    const savedScore = localStorage.getItem("ticTacToeScores");
+
+    if (savedScore) {
+
+        try {
+
+            scores = JSON.parse(savedScore);
+
+        } catch (error) {
+
+            scores = {
+                X: 0,
+                O: 0,
+                draws: 0
+            };
+
+        }
+
     }
-  }
-  return null;
+
+    updateScoreDisplay();
 }
 
-function endRound(winInfo) {
-  state.gameOver = true;
-  cells.forEach((cell) => (cell.disabled = true));
 
-  if (winInfo) {
-    const { combo, winner } = winInfo;
-    combo.forEach((i) => cells[i].classList.add("winning-cell"));
-    drawStrikeLine(combo);
-    state.scores[winner] += 1;
-    scoreXValue.textContent = state.scores.X;
-    scoreOValue.textContent = state.scores.O;
-    turnIndicator.textContent = `Player ${winner} wins this round`;
-    turnIndicator.classList.add("win");
-    showToast(`Player ${winner} takes round ${state.round}`);
-  } else {
-    state.scores.draw += 1;
-    scoreDrawValue.textContent = state.scores.draw;
-    turnIndicator.textContent = "It's a draw";
-    turnIndicator.classList.add("win");
-    showToast("Nobody's board this time — it's a draw");
-  }
+/* =====================================
+   SAVE SCORE
+===================================== */
+
+function saveScore() {
+
+    localStorage.setItem(
+        "ticTacToeScores",
+        JSON.stringify(scores)
+    );
 }
 
-function drawStrikeLine(combo) {
-  const [start, , end] = combo;
-  const [x1, y1] = CELL_CENTER[start];
-  const [x2, y2] = CELL_CENTER[end];
 
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const extend = 26;
-  const len = Math.hypot(dx, dy) || 1;
-  const ux = (dx / len) * extend;
-  const uy = (dy / len) * extend;
+/* =====================================
+   UPDATE SCORE DISPLAY
+===================================== */
 
-  strikeLinePath.setAttribute("x1", x1 - ux);
-  strikeLinePath.setAttribute("y1", y1 - uy);
-  strikeLinePath.setAttribute("x2", x2 + ux);
-  strikeLinePath.setAttribute("y2", y2 + uy);
+function updateScoreDisplay() {
 
-  requestAnimationFrame(() => strikeLine.classList.add("draw-line"));
+    scoreXElement.textContent = scores.X;
+
+    scoreOElement.textContent = scores.O;
+
+    scoreDrawsElement.textContent = scores.draws;
 }
 
-function updateTurnIndicator() {
-  turnIndicator.classList.remove("win");
-  turnIndicator.textContent = `Player ${state.currentPlayer}'s move`;
+
+/* =====================================
+   CELL CLICK
+===================================== */
+
+function handleCellClick(event) {
+
+    const clickedCell = event.currentTarget;
+
+    const index = Number(clickedCell.dataset.index);
+
+
+    // Don't allow moves after game ends
+
+    if (!gameActive) {
+        return;
+    }
+
+
+    // Don't allow an already occupied cell
+
+    if (board[index] !== "") {
+        return;
+    }
+
+
+    // Put player's symbol
+
+    board[index] = currentPlayer;
+
+    clickedCell.textContent = currentPlayer;
+
+    clickedCell.classList.add(
+        currentPlayer.toLowerCase()
+    );
+
+    clickedCell.classList.add("taken");
+
+
+    // Check result
+
+    const result = checkWinner();
+
+
+    if (result) {
+
+        finishGame(result);
+
+        return;
+    }
+
+
+    // Change player
+
+    switchPlayer();
 }
 
-function startNewRound() {
-  state.board = Array(9).fill(null);
-  state.currentPlayer = "X";
-  state.gameOver = false;
-  state.round += 1;
-  roundNumberEl.textContent = state.round;
 
-  cells.forEach((cell) => {
-    cell.textContent = "";
-    cell.disabled = false;
-    cell.className = "cell";
-  });
+/* =====================================
+   CHECK WINNER
+===================================== */
 
-  strikeLine.classList.remove("draw-line");
-  strikeLinePath.setAttribute("x1", 0);
-  strikeLinePath.setAttribute("y1", 0);
-  strikeLinePath.setAttribute("x2", 0);
-  strikeLinePath.setAttribute("y2", 0);
+function checkWinner() {
 
-  updateTurnIndicator();
+    for (
+        const combination of winningCombinations
+    ) {
+
+        const first = combination[0];
+
+        const second = combination[1];
+
+        const third = combination[2];
+
+
+        if (
+            board[first] !== "" &&
+            board[first] === board[second] &&
+            board[first] === board[third]
+        ) {
+
+            return {
+                type: "win",
+
+                player: board[first],
+
+                combination: combination
+            };
+
+        }
+
+    }
+
+
+    // Check draw
+
+    if (!board.includes("")) {
+
+        return {
+            type: "draw"
+        };
+
+    }
+
+
+    return null;
 }
 
-function resetScores() {
-  state.scores = { X: 0, O: 0, draw: 0 };
-  state.round = 0;
-  scoreXValue.textContent = 0;
-  scoreOValue.textContent = 0;
-  scoreDrawValue.textContent = 0;
-  showToast("Scoreboard cleared");
-  startNewRound();
+
+/* =====================================
+   FINISH GAME
+===================================== */
+
+function finishGame(result) {
+
+    gameActive = false;
+
+
+    if (result.type === "win") {
+
+        const winner = result.player;
+
+
+        // Update score
+
+        scores[winner]++;
+
+        saveScore();
+
+        updateScoreDisplay();
+
+
+        // Highlight winning cells
+
+        result.combination.forEach(index => {
+
+            cells[index].classList.add("winner");
+
+        });
+
+
+        // Result message
+
+        resultMessage.textContent =
+            `Player ${winner} wins! 🎉`;
+
+
+        resultMessage.className =
+            "result-message " +
+            `win-${winner.toLowerCase()}`;
+
+
+        turnMessage.textContent =
+            `Player ${winner} won the round`;
+
+
+        updateTurnColor(winner);
+
+    }
+
+
+    else if (result.type === "draw") {
+
+        scores.draws++;
+
+        saveScore();
+
+        updateScoreDisplay();
+
+
+        resultMessage.textContent =
+            "It's a draw! 🤝";
+
+
+        resultMessage.className =
+            "result-message draw";
+
+
+        turnMessage.textContent =
+            "Round ended in a draw";
+
+
+        turnDot.style.background =
+            "#b9b5ff";
+
+        turnDot.style.boxShadow =
+            "0 0 12px rgba(185, 181, 255, 0.7)";
+    }
 }
 
-let toastTimeout;
-function showToast(message) {
-  clearTimeout(toastTimeout);
-  toastEl.textContent = message;
-  toastEl.classList.add("show");
-  toastTimeout = setTimeout(() => toastEl.classList.remove("show"), 2200);
+
+/* =====================================
+   SWITCH PLAYER
+===================================== */
+
+function switchPlayer() {
+
+    if (currentPlayer === "X") {
+
+        currentPlayer = "O";
+
+    } else {
+
+        currentPlayer = "X";
+
+    }
+
+
+    turnMessage.textContent =
+        `Player ${currentPlayer}'s move`;
+
+
+    updateTurnColor(currentPlayer);
 }
 
-init();
+
+/* =====================================
+   TURN COLOR
+===================================== */
+
+function updateTurnColor(player) {
+
+    if (player === "X") {
+
+        turnDot.style.background =
+            "#ffb347";
+
+        turnDot.style.boxShadow =
+            "0 0 12px rgba(255, 179, 71, 0.7)";
+
+    }
+
+    else {
+
+        turnDot.style.background =
+            "#55ddea";
+
+        turnDot.style.boxShadow =
+            "0 0 12px rgba(85, 221, 234, 0.7)";
+    }
+}
+
+
+/* =====================================
+   NEW GAME
+===================================== */
+
+function startNewGame() {
+
+    board = [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+    ];
+
+
+    currentPlayer = "X";
+
+    gameActive = true;
+
+
+    // Clear cells
+
+    cells.forEach(cell => {
+
+        cell.textContent = "";
+
+        cell.classList.remove(
+            "x",
+            "o",
+            "taken",
+            "winner"
+        );
+
+    });
+
+
+    // Clear result
+
+    resultMessage.textContent = "";
+
+    resultMessage.className =
+        "result-message";
+
+
+    // Update turn
+
+    turnMessage.textContent =
+        "Player X's move";
+
+
+    updateTurnColor("X");
+}
+
+
+/* =====================================
+   RESET SCORE
+===================================== */
+
+function resetScore() {
+
+    const confirmed = confirm(
+        "Are you sure you want to reset all scores?"
+    );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    scores = {
+        X: 0,
+        O: 0,
+        draws: 0
+    };
+
+
+    saveScore();
+
+    updateScoreDisplay();
+
+    startNewGame();
+}
+
+
+/* =====================================
+   EVENT LISTENERS
+===================================== */
+
+cells.forEach(cell => {
+
+    cell.addEventListener(
+        "click",
+        handleCellClick
+    );
+
+});
+
+
+newGameBtn.addEventListener(
+    "click",
+    startNewGame
+);
+
+
+resetBtn.addEventListener(
+    "click",
+    resetScore
+);
+
+
+/* =====================================
+   START GAME
+===================================== */
+
+loadScore();
+
+startNewGame();

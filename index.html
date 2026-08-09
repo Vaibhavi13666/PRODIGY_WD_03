@@ -1,44 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tic · Tac · Toe</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tic Tac Toe | Prodigy Task 03</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <main class="board-room">
+    <div class="app">
 
-    <header class="masthead">
-      <p class="eyebrow">Round <span id="roundNumber">1</span></p>
-      <h1>Tic <span class="dot">·</span> Tac <span class="dot">·</span> Toe</h1>
-    </header>
+        <!-- Header -->
+        <header class="header">
+            <p class="round">ROUND 1</p>
 
-    <section class="scoreboard" aria-label="Scoreboard">
-      <div class="score-card" id="scoreX">
-        <span class="score-label">Player X</span>
-        <span class="score-value" id="scoreXValue">0</span>
-      </div>
-      <div class="score-card draw" id="scoreDraw">
-        <span class="score-label">Draws</span>
-        <span class="score-value" id="scoreDrawValue">0</span>
-      </div>
-      <div class="score-card" id="scoreO">
-        <span class="score-label">Player O</span>
-        <span class="score-value" id="scoreOValue">0</span>
-      </div>
-    </section>
+            <h1>Tic <span>•</span> Tac <span>•</span> Toe</h1>
 
-    <p class="turn-indicator" id="turnIndicator">Player X's move</p>
+            <p class="subtitle">
+                Classic strategy game
+            </p>
+        </header>
 
-    <div class="board-wrap">
-      <svg class="strike-line" id="strikeLine" viewBox="0 0 300 300" preserveAspectRatio="none">
-        <line id="strikeLinePath" x1="0" y1="0" x2="0" y2="0" />
-      </svg>
-      <div class="board" id="board" role="grid" aria-label="Tic tac toe board">
-        <button class="cell" data-index="0" role="gridcell" aria-label="Cell 1"></button>
-        <button class="cell" data-index="1" role="gridcell" aria-label="Cell 2"></button>
-        <button class="cell" data-index="2" role="gridcell" aria-label="Cell
+
+        <!-- Score Board -->
+        <section class="scoreboard">
+
+            <div class="score-card player-x">
+                <p>PLAYER X</p>
+                <strong id="scoreX">0</strong>
+            </div>
+
+            <div class="score-card draws">
+                <p>DRAWS</p>
+                <strong id="scoreDraws">0</strong>
+            </div>
+
+            <div class="score-card player-o">
+                <p>PLAYER O</p>
+                <strong id="scoreO">0</strong>
+            </div>
+
+        </section>
+
+
+        <!-- Turn Message -->
+        <div class="turn-box">
+            <span class="turn-dot"></span>
+            <span id="turnMessage">Player X's move</span>
+        </div>
+
+
+        <!-- Game Board -->
+        <main class="game-board" id="gameBoard">
+
+            <button class="cell" data-index="0" aria-label="Cell 1"></button>
+            <button class="cell" data-index="1" aria-label="Cell 2"></button>
+            <button class="cell" data-index="2" aria-label="Cell 3"></button>
+
+            <button class="cell" data-index="3" aria-label="Cell 4"></button>
+            <button class="cell" data-index="4" aria-label="Cell 5"></button>
+            <button class="cell" data-index="5" aria-label="Cell 6"></button>
+
+            <button class="cell" data-index="6" aria-label="Cell 7"></button>
+            <button class="cell" data-index="7" aria-label="Cell 8"></button>
+            <button class="cell" data-index="8" aria-label="Cell 9"></button>
+
+        </main>
+
+
+        <!-- Result -->
+        <div class="result-message" id="resultMessage"></div>
+
+
+        <!-- Buttons -->
+        <div class="controls">
+
+            <button class="control-btn new-game" id="newGameBtn">
+                <span>↻</span>
+                New Game
+            </button>
+
+            <button class="control-btn reset" id="resetBtn">
+                Reset Score
+            </button>
+
+        </div>
+
+
+        <!-- Footer -->
+        <footer>
+            <p>PRODIGY INFOTECH • WEB DEVELOPMENT INTERNSHIP</p>
+            <p>Task 03 • Tic Tac Toe Web Application</p>
+        </footer>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
