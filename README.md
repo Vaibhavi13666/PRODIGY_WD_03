@@ -12,6 +12,14 @@ The game is built using **HTML, CSS, and JavaScript** with a clean and interacti
 
 ### Game Interface
 
+![Tic Tac Toe Game](screenshot1.png)
+
+### Gameplay
+
+![Tic Tac Toe Gameplay](screenshot2.png)
+
+### Game Interface
+
 ![Tic Tac Toe Game](screenshot.png)
 
 ## ✨ Features
